@@ -1,0 +1,8 @@
+﻿  crypt.cpp
+c:\users\anton\programming_in_c++\mylws\oop-lws\crypt\crypt\crypt.cpp(53): warning C4018: <=: несоответствие типов со знаком и без знака
+c:\users\anton\programming_in_c++\mylws\oop-lws\crypt\crypt\crypt.cpp(76): warning C4244: return: преобразование "__int64" в "int", возможна потеря данных
+c:\users\anton\programming_in_c++\mylws\oop-lws\crypt\crypt\crypt.cpp(208): warning C4551: в вызове функции отсутствует список аргументов
+  crypt.vcxproj -> C:\Users\Anton\Programming_in_C++\myLws\oop-lws\crypt\Debug\crypt.exe
+  Program testing failed
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(138,5): error MSB3073: выход из команды "Test.bat "C:\Users\Anton\Programming_in_C++\myLws\oop-lws\crypt\Debug\crypt.exe"
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(138,5): error MSB3073: :VCEnd" с кодом 1.

@@ -1,0 +1,4 @@
+﻿  MultMatrix.cpp
+c:\users\anton\programming_in_c++\mylws\oop-lws\multmatrix\multmatrix\multmatrix.cpp(50): warning C4018: <=: несоответствие типов со знаком и без знака
+c:\users\anton\programming_in_c++\mylws\oop-lws\multmatrix\multmatrix\multmatrix.cpp(73): warning C4244: return: преобразование "__int64" в "int", возможна потеря данных
+  MultMatrix.vcxproj -> C:\Users\Anton\Programming_in_C++\myLws\oop-lws\MultMatrix\Debug\MultMatrix.exe
