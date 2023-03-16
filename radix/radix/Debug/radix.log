@@ -1,5 +1,0 @@
-﻿  radix.cpp
-c:\users\anton\programming_in_c++\mylws\oop-lws\radix\radix\radix.cpp(52): warning C4018: <=: несоответствие типов со знаком и без знака
-c:\users\anton\programming_in_c++\mylws\oop-lws\radix\radix\radix.cpp(75): warning C4244: return: преобразование "__int64" в "int", возможна потеря данных
-c:\users\anton\programming_in_c++\mylws\oop-lws\radix\radix\radix.cpp(97): warning C4018: <: несоответствие типов со знаком и без знака
-  radix.vcxproj -> C:\Users\Anton\Programming_in_C++\myLws\oop-lws\radix\Debug\radix.exe
