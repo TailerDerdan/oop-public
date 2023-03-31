@@ -169,7 +169,7 @@ void UpdateTheDictionary(Dictionary& dictionary, std::fstream& output, const std
 	}
 }
 
-bool Translator()
+bool UserInteractionsWithDictionary()
 {
 	std::string path = "dictionary.txt";
 	std::fstream fileDictionary(path);
@@ -194,7 +194,6 @@ bool Translator()
 			break;
 		}
 		bool err = false;
-		std::cout << '>';
 		TranslateWord(word, dictionary);
 		transferCount++;
 	}
@@ -222,7 +221,7 @@ int main()
 	SetConsoleOutputCP(1251);
 	
 	bool err = false;
-	if (!Translator())
+	if (!UserInteractionsWithDictionary())
 	{
 		return EXIT_FAILURE;
 	}

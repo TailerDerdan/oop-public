@@ -1,0 +1,4 @@
+﻿  PrimeNumbers.cpp
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\primenumbers\primenumbers\primenumbers.cpp(10): warning C4018: <=: несоответствие типов со знаком и без знака
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\primenumbers\primenumbers\primenumbers.cpp(14): warning C4018: <: несоответствие типов со знаком и без знака
+  PrimeNumbers.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw2\PrimeNumbers\Debug\PrimeNumbers.exe

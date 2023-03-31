@@ -1,0 +1,11 @@
+﻿  PrimeNumbers.cpp
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\primenumbers\primenumbers\primenumbers.cpp(22): warning C4267: аргумент: преобразование из "size_t" в "const int"; возможна потеря данных
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\primenumbers\primenumbers\primenumbers.cpp(25): warning C4244: инициализация: преобразование "double" в "size_t", возможна потеря данных
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\primenumbers\primenumbers\primenumbers.cpp(29): warning C4267: аргумент: преобразование из "size_t" в "const int"; возможна потеря данных
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\primenumbers\primenumbers\primenumbers.cpp(39): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+  Создание кода
+  4 of 224 functions ( 1.8%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  PrimeNumbers.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw2\PrimeNumbers\x64\Release\PrimeNumbers.exe
