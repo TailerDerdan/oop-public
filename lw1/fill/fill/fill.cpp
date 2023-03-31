@@ -4,153 +4,196 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <array>
 
+//Использовать enum
 struct Args
 {
 	std::string inputFile;
 	std::string outputFile;
 };
 
-
-struct Cell
+enum Cell
 {
-	bool isWall = false;
-	bool isFilled = false;
-	bool startFill = false;
+	isWall,
+	isFilled,
+	startFill,
+	emptyCell
 };
+
+using FieldArray = std::array<std::array<Cell, 100>, 100>;
 
 struct Coord
 {
 	int x = 0, y = 0;
 };
 
-void ReadFile(std::ifstream& inputFile, Cell(&Field)[100][100], std::vector<Coord>& Coords, int& xMax, int& yMax, bool& wasErr)
+struct StructField
 {
+	std::ifstream inputFile;
+	std::ofstream outputFile;
+	std::vector<Coord> coordsStart;
+	FieldArray field;
+	int xMax = 0;
+	int yMax = 0;
+};
+
+//сделать чтобы функция возвращала bool
+//поместить параметры функции в struct field
+//переименовать в readfield
+//передовать istream
+
+bool ReadField(const std::string& inputPath, std::ifstream& inputFile)
+{
+	inputFile.open(inputPath);
+	if (!inputFile.is_open())
+	{
+		std::cout << "Failed to open '" << inputPath << "' for reading\n";
+		return false;
+	}
+	return true;
+}
+
+bool ReadField(StructField& field, const std::string& inputPath)
+{
+	if (!ReadField(inputPath, field.inputFile))
+	{
+		return false;
+	}
+
 	char ch;
 	int x = 0, y = 0;
-	while (inputFile.get(ch))
+	const int MAX_WIDTH = 100;
+	while (field.inputFile.get(ch))
 	{
 		Coord Temp;
 		if (ch == '\n')
 		{
 			++y;
-			xMax = std::max(xMax, x);
+			field.xMax = std::max(field.xMax, x);
 			x = 0;
 		}
-		else if (x < 100)
+		else if (x < MAX_WIDTH)//задать именованную константу
 		{
 			switch (ch)
 			{
 			case '#':
-				Field[x][y].isWall = true;
-				Field[x][y].isFilled = true;
+				field.field[x][y] = isWall;
 				++x;
 				break;
 			case 'O':
-				Field[x][y].startFill = true;
-				Field[x][y].isFilled = true;
+				field.field[x][y] = startFill;
 				Temp.x = x;
 				Temp.y = y;
-				Coords.push_back(Temp);
+				field.coordsStart.push_back(Temp);
 				++x;
 				break;
 			case ' ':
+				field.field[x][y] = emptyCell;
 				++x;
 				break;
 			default:
 				std::cout << "Uncorrect character, please use '#', 'O', ' ', 'char for move to the next line' \n";
-				wasErr = true;
+				return false;
 			}
 		}
 	}
-	yMax = y;
+	field.yMax = y;
+	return true;
 }
 
-std::vector<Coord> GetCoordFilledCell(std::vector<Coord>& CoordsStartCell, Cell(&Field)[100][100], int& xMax, int& yMax)
+void FillCell(StructField& field, int x, int y, std::vector<Coord>& result)
+{
+	Coord temporaryCoord;
+	if (field.field[x][y] != isFilled && field.field[x][y] == emptyCell)         // Вверх
+	{
+		temporaryCoord.x = x;
+		temporaryCoord.y = y;
+		result.push_back(temporaryCoord);
+		field.field[x][y] = isFilled;
+		field.yMax = std::max(temporaryCoord.y, field.yMax);
+		field.xMax = std::max(temporaryCoord.x, field.xMax);
+	}
+}
+
+std::vector<Coord> GetCoordFilledCell(StructField& field, std::vector<Coord>& coordStartCell)
 {
 	std::vector<Coord> result;
-	while (!CoordsStartCell.empty())
+	const int MAX_WIDTH = 100;
+	const int MIN_WIDTH = 0;
+	while (!coordStartCell.empty())
 	{
-		Coord CurrentCell;
-		Coord Temp;
-		CurrentCell = CoordsStartCell.at(CoordsStartCell.size() - 1);
-		CoordsStartCell.pop_back();
-		if ((CurrentCell.x <= 99) && (CurrentCell.x >= 0) && (CurrentCell.y <= 98) && (CurrentCell.y >= 1))
+		//перемменые с маленькой буквы
+		Coord currentCell;
+		//объявить в место ее использование
+		currentCell = coordStartCell.at(coordStartCell.size() - 1);
+		coordStartCell.pop_back();
+		//магические числа
+		//сложный код
+		//устранить дублироввание кода(перенести в фукнцию)
+		if ((currentCell.x <= MAX_WIDTH - 1) && (currentCell.x >= MIN_WIDTH) && 
+			(currentCell.y <= MAX_WIDTH - 2) && (currentCell.y >= MIN_WIDTH + 1))
 		{
-			if (!Field[CurrentCell.x][CurrentCell.y - 1].isFilled)         // Вверх
-			{
-				Temp.x = CurrentCell.x;
-				Temp.y = CurrentCell.y - 1;
-				result.push_back(Temp);
-				Field[CurrentCell.x][CurrentCell.y - 1].isFilled = true;
-			}
-			if (!Field[CurrentCell.x][CurrentCell.y + 1].isFilled)         // Вниз
-			{
-				Temp.x = CurrentCell.x;
-				Temp.y = CurrentCell.y + 1;
-				result.push_back(Temp);
-				Field[CurrentCell.x][CurrentCell.y + 1].isFilled = true;
-				yMax = std::max(Temp.y, yMax);
-			}
+			FillCell(field, currentCell.x, currentCell.y - 1, result);             // Вверх
+			FillCell(field, currentCell.x, currentCell.y + 1, result);             // Вниз
 		}
-		if ((CurrentCell.x <= 98) && (CurrentCell.x >= 1) && (CurrentCell.y <= 99) && (CurrentCell.y >= 0))
+		if ((currentCell.x <= MAX_WIDTH - 2) && (currentCell.x >= MIN_WIDTH + 1) && 
+			(currentCell.y <= MAX_WIDTH - 1) && (currentCell.y >= MIN_WIDTH))
 		{
-			if (!Field[CurrentCell.x - 1][CurrentCell.y].isFilled)         // Влево
-			{
-				Temp.x = CurrentCell.x - 1;
-				Temp.y = CurrentCell.y;
-				result.push_back(Temp);
-				Field[CurrentCell.x - 1][CurrentCell.y].isFilled = true;
-			}
-			if (!Field[CurrentCell.x + 1][CurrentCell.y].isFilled)         // Вправо 
-			{
-				Temp.x = CurrentCell.x + 1;
-				Temp.y = CurrentCell.y;
-				result.push_back(Temp);
-				Field[CurrentCell.x + 1][CurrentCell.y].isFilled = true;
-				xMax = std::max(Temp.x, xMax);
-			}
+			FillCell(field, currentCell.x - 1, currentCell.y, result);             // Влево
+			FillCell(field, currentCell.x + 1, currentCell.y, result);             // Вправо
 		}
 	}
 	return result;
 }
 
-void Fill(Cell(&Field)[100][100], std::vector<Coord>& CoordsStartCell, int& xMax, int& yMax)
+void Fill(StructField& field)
 {
-	std::vector<Coord> NextGenerationCell;
+	std::vector<Coord> nextGenerationCell;
 
-	NextGenerationCell = GetCoordFilledCell(CoordsStartCell, Field, xMax, yMax);
-	while (!NextGenerationCell.empty())
+	nextGenerationCell = GetCoordFilledCell(field, field.coordsStart);
+	while (!nextGenerationCell.empty())
 	{
-		NextGenerationCell = GetCoordFilledCell(NextGenerationCell, Field, xMax, yMax);
+		nextGenerationCell = GetCoordFilledCell(field, nextGenerationCell);
 	}
 }
 
-void Rendering(Cell(&Field)[100][100], std::ofstream& outputFile, int xMax, int yMax)
+//передавать ostream
+//перенести параметры функции в структуру
+//Field с маленькой буквы
+bool Rendering(StructField& field, const std::string& output)
 {
-	for (int i = 0; i <= yMax; ++i)
+	field.outputFile.open(output);
+	if (!field.outputFile.is_open())
 	{
-		for (int j = 0; j < xMax; ++j)
+		std::cout << "Failed to open '" << output << "' for writing\n";
+		return false;
+	}
+	for (int i = 0; i <= field.yMax; ++i)
+	{
+		for (int j = 0; j < field.xMax; ++j)
 		{
-			if ((Field[j][i].isFilled) && (!Field[j][i].isWall) && (!Field[j][i].startFill))
+			auto& cell = field.field[j][i];
+			if (cell == isFilled)
 			{
-				outputFile.put('.');
+				field.outputFile.put('.');
 			}
-			if ((!Field[j][i].isFilled) && (!Field[j][i].isWall) && (!Field[j][i].startFill))
+			if (cell == emptyCell)
 			{
-				outputFile.put(' ');
+				field.outputFile.put(' ');
 			}
-			if (Field[j][i].isWall)
+			if (cell == isWall)
 			{
-				outputFile.put('#');
+				field.outputFile.put('#');
 			}
-			if (Field[j][i].startFill)
+			if (cell == startFill)
 			{
-				outputFile.put('O');
+				field.outputFile.put('O');
 			}
 		}
-		outputFile.put('\n');
+		field.outputFile.put('\n');
 	}
+	return true;
 }
 
 std::optional<Args> ParseArgs(int argc, char* argv[])
@@ -167,44 +210,6 @@ std::optional<Args> ParseArgs(int argc, char* argv[])
 	return args;
 }
 
-bool FillShapes(const std::string& input, const std::string& output)
-{
-	std::ifstream inputFile;
-	std::ofstream outputFile;
-
-	inputFile.open(input);
-	outputFile.open(output);
-
-	if (!inputFile.is_open())
-	{
-		std::cout << "Failed to open '" << input << "' for reading\n";
-		return false;
-	}
-
-	if (!outputFile.is_open())
-	{
-		std::cout << "Failed to open '" << output << "' for writing\n";
-		return false;
-	}
-
-	std::vector<Coord> CoordsStartCell;
-
-	Cell Field[100][100];
-	int xMax = 0, yMax = 0;
-	bool wasErr = false;
-
-	ReadFile(inputFile, Field, CoordsStartCell, xMax, yMax, wasErr);
-	if (wasErr)
-	{
-		return false;
-	}
-
-	Fill(Field, CoordsStartCell, xMax, yMax);
-	Rendering(Field, outputFile, xMax, yMax);
-
-	return true;
-}
-
 int main(int argc, char* argv[])
 {
 	auto args = ParseArgs(argc, argv);
@@ -213,7 +218,15 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (!FillShapes(args->inputFile, args->outputFile))
+	StructField field;
+	if (!ReadField(field, args->inputFile))
+	{
+		return EXIT_FAILURE;
+	}
+
+	Fill(field);
+
+	if (!Rendering(field, args->outputFile))
 	{
 		return EXIT_FAILURE;
 	}

@@ -1,0 +1,3 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (Debug\) содержит файлы, которые используются совместно с другим проектом (HTML Decode.vcxproj).  Это может привести к ошибкам очистки и перестроения.
+  HTML Decode.cpp
+  HTML Decode.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw2\HTML Decode\Debug\HTML_Decode.exe

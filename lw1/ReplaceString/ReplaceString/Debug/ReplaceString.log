@@ -1,4 +1,3 @@
 ﻿  ReplaceString.cpp
-c:\users\anton\programming_in_c++\mylws\oop-lws\replacestring\replacestring\replacestring.cpp(92): warning C4715: CopyFileWithReplacement: значение возвращается не при всех путях выполнения
-  ReplaceString.vcxproj -> C:\Users\Anton\Programming_in_C++\myLws\oop-lws\ReplaceString\Debug\ReplaceString.exe
-  Program testing succesed
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw1\replacestring\replacestring\replacestring.cpp(92): warning C4715: CopyFileWithReplacement: значение возвращается не при всех путях выполнения
+  ReplaceString.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw1\ReplaceString\Debug\ReplaceString.exe

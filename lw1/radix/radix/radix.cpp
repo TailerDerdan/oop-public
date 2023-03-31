@@ -12,63 +12,67 @@ struct Args
 
 int LetterToNumber(const char& ch, bool& wasError)
 {
+	const int DIF_BETW_NUMBER_OF_DIGIT_AND_LETTER = 7;
+	const char CONST_FOR_CONVERT_CHAR_TO_DIGIT = '0';
 	if (isdigit(ch))
 	{
 		wasError = false;
-		return ch - '0';
+		return ch - CONST_FOR_CONVERT_CHAR_TO_DIGIT;
 	}
 	else if (isalpha(ch))
 	{
 		wasError = false;
-		return ch - '0' - 7;
+		return ch - CONST_FOR_CONVERT_CHAR_TO_DIGIT - DIF_BETW_NUMBER_OF_DIGIT_AND_LETTER;//TODO: use const
 	}
 	else
 	{
 		wasError = true;
-		return EXIT_FAILURE;
+		return EXIT_SUCCESS;//TODO: use 0
 	}
 }
 
-int StringToInt(const std::string& str, int radix, bool& wasError)
+int StringToInt(const std::string& str, int radix, bool& wasError, bool& wasErrorForOverflow)
 {
 	if ((str.empty()) || (radix < 2) || (radix > 36))
 	{
 		wasError = true;
-		return EXIT_FAILURE;
+		return EXIT_SUCCESS;//TODO: use 0
 	}
 
 	int i = 0;
-	long long result = 0;
-	int numberInStr = 0;
+	 //TODO: переменные можно обьявлять ближе к месту использования
+	//TDOO: переименовать число символа
 
-	bool identifierNeg = false;
+	bool isNegative = false; //TODO: isNegative
+	const char negativeChar = '-';
 
-	if (str[i] == '-')
+	if (str[i] == negativeChar)//TODO: symbol to const
 	{
-		identifierNeg = true;
+		isNegative = true;
 		i = 1;
 	}
 
+	long long result = 0;
+	int charNumber = 0;
+
 	while (i <= str.length() - 1)
 	{
-		numberInStr = LetterToNumber(str[i], wasError);
-		if ((wasError) || (numberInStr > radix))
+		charNumber = LetterToNumber(str[i], wasError);
+		if ((wasError) || (charNumber > radix))
 		{
 			wasError = true;
-			return EXIT_FAILURE;
+			return EXIT_SUCCESS;
 		}
-		if (result >= ((INT32_MAX - numberInStr) / radix))
+		if (result >= ((INT32_MAX - charNumber) / radix))
 		{
-			result %= INT32_MAX;
+			//TODO: нужно вернуть ошибку
+			wasErrorForOverflow = true;
+			return EXIT_SUCCESS;
 		}
-		result = result * radix + numberInStr;
+		result = result * radix + charNumber;
 		++i;
 	}
-	if (result >= ((INT32_MAX - numberInStr) / radix))
-	{
-		result %= INT32_MAX;
-	}
-	if (identifierNeg)
+	if (isNegative)
 	{
 		result *= -1;
 	}
@@ -77,18 +81,22 @@ int StringToInt(const std::string& str, int radix, bool& wasError)
 
 char NumberToChar(int remain, bool& wasError)
 {
+	const int DIF_BETW_NUMBER_OF_DIGIT_AND_LETTER = 7;
+	const char CONST_FOR_CONVERT_CHAR_TO_DIGIT = '0';
+	const char negativeChar = '-';
+
 	if ((remain >= 0) && (remain <= 9))
 	{
-		return remain + '0';
+		return remain + CONST_FOR_CONVERT_CHAR_TO_DIGIT;
 	}
 	else if ((remain >= 10) && (remain <= 36))
 	{
-		return remain + '0' + 7;
+		return remain + CONST_FOR_CONVERT_CHAR_TO_DIGIT + DIF_BETW_NUMBER_OF_DIGIT_AND_LETTER;
 	}
 	else
 	{
 		wasError = true;
-		return '-';
+		return negativeChar;
 	}
 }
 
@@ -100,7 +108,7 @@ void Reverse(std::string& str)
 	}
 }
 
-std::string IntToString(int n, int radix, bool& wasError)
+std::string IntToString(int number, int radix, bool& wasError)
 {
 	std::string str;
 	if ((radix < 2) || (radix > 36))
@@ -109,21 +117,22 @@ std::string IntToString(int n, int radix, bool& wasError)
 		return str;
 	}
 
-	bool identifierNeg = false;
-	if (n < 0)
+	bool isNegative = false;
+	if (number < 0)
 	{
-		identifierNeg = true;
-		n *= -1;
+		isNegative = true;
+		number *= -1;
 	}
 
 	int remain = 0;
 	int quoit = 0;
 
-	while (n >= radix)
+	while (number >= radix)
 	{
-		remain = n % radix;
-		n -= remain;
-		n /= radix;
+		remain = number % radix;
+		number -= remain;
+		number /= radix;
+
 		str.push_back(NumberToChar(remain, wasError));
 		if (wasError)
 		{
@@ -131,14 +140,14 @@ std::string IntToString(int n, int radix, bool& wasError)
 			return str;
 		}
 	}
-	remain = n % radix;
+	remain = number % radix;
 	str.push_back(NumberToChar(remain, wasError));
 	if (wasError)
 	{
 		str.clear();
 		return str;
 	}
-	if (identifierNeg)
+	if (isNegative)
 	{
 		str.push_back('-');
 	}
@@ -150,8 +159,9 @@ std::optional<Args> ParseArgs(int argc, char* argv[])
 {
 	if (argc != 4)
 	{
-		std::cout << "Invalid argument count\n"
-			<< "Usage: replace.exe <SourceNotation> <DestinationNotation> <value>\n";
+		//TODO: use const EOLN 
+		std::cout << "Invalid argument count" << std::endl;
+		std::cout << "Usage: replace.exe <SourceNotation> <DestinationNotation> <value>" << std::endl;
 		return std::nullopt;
 	}
 	Args args;
@@ -162,48 +172,56 @@ std::optional<Args> ParseArgs(int argc, char* argv[])
 	return args;
 }
 
-bool CheckedError(bool err)
+//TODO: переименовать на использование глагола
+bool CheckError(bool err, bool errOverflow)
 {
 	if (err)
 	{
-		std::cout << "Incorrect data entry.\n";
-		std::cout << "Please enter numbers or letter(A..Z)\n";
+		std::cout << "Incorrect data entry." << std::endl;
+		std::cout << "Please enter numbers or letter(A..Z)" << std::endl;
+		return true;
+	}
+	if (errOverflow)
+	{
+		std::cout << "Overflow" << std::endl;
 		return true;
 	}
 	return false;
 }
 
-bool TranslationNumber(const std::string& sourceNotation, const std::string& destinationNotation, const std::string& value)
+//TODO: переименовать на использование глагола
+bool TranslateNumberFromSourceToDestination(const std::string& sourceNotation, const std::string& destinationNotation, const std::string& value)
 {
 	bool err = false;
+	bool errOverflow = false;
 
-	int sourceNotationInt = StringToInt(sourceNotation, 10, err);
-	if (CheckedError(err))
+	int sourceNotationInt = StringToInt(sourceNotation, 10, err, errOverflow);
+	if (CheckError(err, errOverflow))
 	{
 		return false;
 	}
 
-	int destinationNotationInt = StringToInt(destinationNotation, 10, err);
-	if (CheckedError(err))
+	int destinationNotationInt = StringToInt(destinationNotation, 10, err, errOverflow);
+	if (CheckError(err, errOverflow))
 	{
 		return false;
 	}
 
-	int valueInt = StringToInt(value, sourceNotationInt, err);
-	if (CheckedError(err))
+	int valueInt = StringToInt(value, sourceNotationInt, err, errOverflow);
+	if (CheckError(err, errOverflow))
 	{
 		return false;
 	}
 
 	std::string result = IntToString(valueInt, destinationNotationInt, err);
-	if (CheckedError(err))
+	if (CheckError(err, errOverflow))
 	{
 		return false;
 	}
 
 	if (!err)
 	{
-		std::cout << result << '\n';
+		std::cout << result << std::endl;
 	}
 	
 	return true;
@@ -217,7 +235,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (!TranslationNumber(args->sourceNotation, args->destinationNotation, args->value))
+	if (!TranslateNumberFromSourceToDestination(args->sourceNotation, args->destinationNotation, args->value))
 	{
 		return EXIT_FAILURE;
 	}
