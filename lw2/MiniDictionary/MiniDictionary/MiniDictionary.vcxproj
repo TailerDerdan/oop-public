@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MiniDictionary.cpp" />
+    <ClCompile Include="WorkingWithDictionary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="dictionary.txt" />
