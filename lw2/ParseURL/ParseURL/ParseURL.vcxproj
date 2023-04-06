@@ -152,6 +152,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ParseURL.cpp" />
+    <ClCompile Include="ParsingURL.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="modules.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
