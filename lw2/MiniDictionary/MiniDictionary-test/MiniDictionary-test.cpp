@@ -8,8 +8,9 @@ SCENARIO("Find word in dictionary")
 	Dictionary dictionary = { { {"cat"}, {"кот", "кошка"} } };
 	std::string word1 = "cat";
 	std::string word2 = "кот";
-	REQUIRE(FindTermInDictionary(word1, dictionary));
-	REQUIRE(FindTermInDictionary(word2, dictionary));
+	std::string messageToUser;
+	REQUIRE(FindTermInDictionary(word1, dictionary, messageToUser));
+	REQUIRE(FindTermInDictionary(word2, dictionary, messageToUser));
 }
 
 SCENARIO("Add word with translations in dictionary")
@@ -19,8 +20,9 @@ SCENARIO("Add word with translations in dictionary")
 	std::string translation1 = "древний";
 	std::string translation2 = "старинный";
 	bool foundWord = false;
-	AddWordWithTranslationInDictionary(foundWord, dictionary, word, translation1);
-	REQUIRE(FindTranslationInDictionary(word, translation2, dictionary));
+	std::string messageToUser;
+	AddWordWithTranslationInDictionary(foundWord, dictionary, word, translation1, messageToUser);
+	REQUIRE(FindTranslationInDictionary(word, translation2, dictionary, messageToUser));
 	Dictionary result = { {{"ancient"}, {"древний", "старинный"}} };
 	REQUIRE(dictionary == result);
 }
