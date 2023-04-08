@@ -1,9 +1,13 @@
 #pragma once
-
 #include <iostream>
 #include <set>
-#include <algorithm>
-#include <vector>
-#include <iterator>
+#include <optional>
+#include <string>
 
-std::set<int> TheSieveOfErotosfen(int);
+struct Args
+{
+	std::string upperBound;
+};
+
+std::set<int> TheSieveOfEratosfen(int);
+std::optional<Args> ParseArgs(int argc, char* argv[]);

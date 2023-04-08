@@ -1,32 +1,52 @@
 #include "modules.h"
+#include <algorithm>
+#include <vector>
+#include <iterator>
 
-std::set<int> TheSieveOfErotosfen(int upperBound)
+std::set<int> TheSieveOfEratosfen(int upperBound)
 {
+	const int LOWER_BOUND = 2;
 	std::set<int> result;
-	if (upperBound < 2)
+	if (upperBound < LOWER_BOUND)
 	{
 		return result;
 	}
-	std::vector<bool> primeNumbers = std::vector<bool>(upperBound, false);
-	for (size_t i = 2; i*i <= upperBound; ++i)
+	// почитать про vector<bool>
+	// Numbers => isCompound, sieve
+	std::vector<bool> isCompound = std::vector<bool>(upperBound, false);
+	
+	for (int num = LOWER_BOUND; num <= std::ceil(std::sqrt(upperBound)) + 1; ++num)
 	{
-		size_t j = i + i;
-		while (j < upperBound)
+		size_t primeNum = num + num;
+		while (primeNum < upperBound)
 		{
-			primeNumbers.at(j) = true;
-			j += i;
-		}
-		if (!primeNumbers.at(i))
-		{
-			result.insert(i);
+			// at => []
+			isCompound[primeNum] = true;
+			primeNum += num;
 		}
 	}
-	for (size_t i = std::sqrt(upperBound); i < upperBound; ++i)
+	for (int num = LOWER_BOUND; num < upperBound; ++num) // warning
 	{
-		if (!primeNumbers.at(i))
+		if (!isCompound[num])
 		{
-			result.insert(i);
+			result.insert(num);
 		}
+	}
+	if (!isCompound[upperBound - 1])
+	{
+		result.insert(upperBound);
 	}
 	return result;
+}
+
+std::optional<Args> ParseArgs(int argc, char* argv[])
+{
+	if (argc != 2)
+	{
+		std::cout << "Invalid argument count" << std::endl << "Usage: primenumber.exe <upperBound>" << std::endl;
+		return std::nullopt;
+	}
+	Args args;
+	args.upperBound = argv[1];
+	return args;
 }
