@@ -5,6 +5,6 @@
 #include <iterator>
 #include <algorithm>
 
-std::vector<double> ReadVector(std::vector<double>&);
-std::vector<double> MultiplyByMinElement(std::vector<double>&);
-void WriteVector(std::vector<double>&);
+void MultiplyByMinElement(std::vector<double>&);
+void SortVector(std::vector<double>&);
+void WriteSortedVector(std::vector<double>);

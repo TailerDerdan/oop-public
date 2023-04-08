@@ -1,26 +1,24 @@
 #include "modules.h"
 
-std::vector<double> ReadVector(std::vector<double>& numbers)
+//возвращать void
+void MultiplyByMinElement(std::vector<double>& numbers)
 {
-	std::copy(std::istream_iterator<double>(std::cin), std::istream_iterator<double>(), std::back_inserter(numbers));
-	return numbers;
-}
-
-std::vector<double> MultiplyByMinElement(std::vector<double>& numbers)
-{
-	std::vector<double> result = numbers;
 	if (!numbers.empty())
 	{
-		const double min = *std::min_element(result.begin(), result.end());
-		std::transform(result.begin(), result.end(), result.begin(), [&min](double& num) { return num * min; });
+		const double min = *std::min_element(numbers.begin(), numbers.end());
+		std::transform(numbers.begin(), numbers.end(), numbers.begin(), [min](double num) { return num * min; });
 	}
-
-	return result;
 }
 
-void WriteVector(std::vector<double>& numbers)
+void SortVector(std::vector<double>& numbers)
 {
 	std::sort(numbers.begin(), numbers.end());
+}
+
+//переименовать функцию и изменить передачу параметров по значению
+void WriteSortedVector(std::vector<double> numbers)
+{
+	SortVector(numbers);
 	if (!numbers.empty())
 	{
 		copy(numbers.begin(), numbers.end() - 1, std::ostream_iterator<double>(std::cout, ", "));

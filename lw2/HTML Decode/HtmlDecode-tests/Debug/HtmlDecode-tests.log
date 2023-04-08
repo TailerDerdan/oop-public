@@ -1,5 +1,5 @@
 ﻿  DecodeFunctions.cpp
   HtmlDecode-tests.cpp
-c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\html decode\htmldecode-tests\htmldecode-tests.cpp(22): warning C4129: &: неизвестная escape-последовательность
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw2\html decode\htmldecode-tests\htmldecode-tests.cpp(19): warning C4129: &: неизвестная escape-последовательность
   Создание кода...
   HtmlDecode-tests.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw2\HTML Decode\Debug\HtmlDecode-tests.exe

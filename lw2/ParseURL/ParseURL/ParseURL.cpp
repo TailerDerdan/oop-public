@@ -8,8 +8,12 @@ int main() {
 	std::string host;
 	std::string document;
 
-	ParseURL(url, protocol, port, host, document);
+	if (!ParseURL(url, protocol, port, host, document))
+	{
+		std::cout << "Invalid URL" << std::endl;
+		return EXIT_FAILURE;
+	}
 	OutputPort(protocol, port, host, document);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

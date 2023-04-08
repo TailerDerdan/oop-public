@@ -6,14 +6,15 @@
 SCENARIO("Multiply elements of empty vector given empty vector")
 {
 	std::vector<double> vector;
-	REQUIRE(MultiplyByMinElement(vector).empty());
+	MultiplyByMinElement(vector);
+	REQUIRE(vector.empty());
 }
 
 SCENARIO("Multiplay some elements of vector on min element")
 {
 	std::vector<double> vector = { -6, 5, 3.345, 7, 6, 2 };
 	std::vector<double> correctVector = { -42, -36, -30, -20.07, -12, 36 };
-	vector = MultiplyByMinElement(vector);
-	WriteVector(vector);
+	MultiplyByMinElement(vector);
+	SortVector(vector);//Не выводить
 	REQUIRE(vector == correctVector);
 }

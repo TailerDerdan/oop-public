@@ -1,62 +1,57 @@
 #include "modules.h"
 
-std::string DecodeSpecialChar(std::string& temp, bool& wasError)
+std::string DecodeSpecialChar(std::string& temp)
 {
-	if (temp == "&quot;")
+	std::map<std::string, std::string> specialChar{ {"&quot;", "\""}, { "&apos;", "'" }, 
+	{ "&gt;", ">" }, { "&lt;", "<" }, { "&amp;", "&" } };
+
+	for (auto iter : specialChar)
 	{
-		return "\"";
+		if (temp == iter.first)
+		{
+			return iter.second;
+		}
 	}
-	if (temp == "&apos;")
-	{
-		return "'";
-	}
-	if (temp == "&gt;")
-	{
-		return ">";
-	}
-	if (temp == "&lt;")
-	{
-		return "<";
-	}
-	if (temp == "&amp;")
-	{
-		return "&";
-	}
-	else
-	{
-		wasError = true;
-		return " ";
-	}
+
+	return temp;
 }
 
-std::string HtmlDecode(const std::string& html, bool& err)
+std::string HtmlDecode(const std::string& html)
 {
 	if (html.empty())
 	{
 		return html;
 	}
-	std::string result = html;
+	std::string result;
 	size_t pos = 0;
 	size_t curPosSpecialChar = 0;
 	size_t nextPosSpecialChar = 0;
 
-	while (curPosSpecialChar <= result.length() && nextPosSpecialChar <= result.length())
+	while (curPosSpecialChar <= html.length() && nextPosSpecialChar <= html.length())
 	{
-		curPosSpecialChar = result.find('&', curPosSpecialChar);
 		pos = curPosSpecialChar;
-		nextPosSpecialChar = result.find(';', curPosSpecialChar);
+		curPosSpecialChar = html.find('&', curPosSpecialChar);
+		nextPosSpecialChar = html.find(';', curPosSpecialChar);
 
-		std::string temp;
-		temp.append(result, pos, nextPosSpecialChar - curPosSpecialChar + 1);
-
-		std::string specialChar = DecodeSpecialChar(temp, err);
-		if (err)
+		// изменить имя перемменой
+		std::string potentialHTMLEnt;
+		if (curPosSpecialChar <= html.length())
 		{
-			std::cout << "There is no such html entity - " << temp << std::endl;
-			return result;
+			potentialHTMLEnt.append(html, curPosSpecialChar, nextPosSpecialChar - curPosSpecialChar + 1);
 		}
-		result.replace(curPosSpecialChar, temp.size(), specialChar);
-		curPosSpecialChar++;
+
+		//не должна возвращать ошибок
+		if (!potentialHTMLEnt.empty())
+		{
+			std::string specialChar = DecodeSpecialChar(potentialHTMLEnt);
+			result.append(html, pos, curPosSpecialChar - pos).append(specialChar);
+			curPosSpecialChar+=potentialHTMLEnt.size();
+		}
+		if (potentialHTMLEnt.empty())
+		{
+			result.append(html, pos, html.size() - pos);
+		}
+		//формировать новую строку, а не модифицировать существующую
 	}
 	return result;
 }
