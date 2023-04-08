@@ -1,26 +1,28 @@
 #pragma once
 
-#include <iostream>
-#include <algorithm>
 #include <string>
 #include <vector>
 #include <map>
 #include <fstream>
 #include <windows.h>
-#include <cctype>
-#include <utility>
-#include <iterator>
+#include <optional>
+
+struct Args
+{
+	std::string input;
+};
 
 typedef std::map<std::vector<std::string>, std::vector<std::string>> Dictionary;
 
-std::string Str_tolower(std::string);
-bool IsEnglishWord(const std::string&);
-bool FindWordInVector(std::vector<std::string>&, std::string);
-bool FindTermInDictionary(std::string&, Dictionary&);
-bool FindTranslationInDictionary(std::string&, std::string&, Dictionary&);
-void AddWordWithTranslationInDictionary(bool, Dictionary&, std::string&, std::string&);
-void TranslateWord(std::string&, Dictionary&);
-std::vector<std::string> ParseString(std::string&);
-bool ReadFileForDictionary(Dictionary&, std::fstream&, std::string);
-void UpdateTheDictionary(Dictionary&, std::fstream&, const std::string&);
-bool UserInteractionsWithDictionary();
+std::string Str_tolower(std::string s);
+bool IsEnglishWord(const std::string& word);
+bool FindWordInVector(std::vector<std::string>& words, std::string word);
+bool FindTermInDictionary(std::string& word, Dictionary& dictionary, std::string& messageToUser);
+bool FindTranslationInDictionary(std::string& translation, std::string& word, Dictionary& dictionary, std::string& messageToUser);
+void AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, std::string& word, std::string& translation, std::string& messageToUser);
+void WordInteractWithDictionary(std::string& word, Dictionary& dictionary);
+std::vector<std::string> ParseString(std::string& line);
+bool ReadDictionaryFromFile(Dictionary& dictionary, std::fstream& input, std::string path);
+void UpdateTheDictionary(Dictionary& dictionary, std::fstream& output, const std::string& path);
+bool UserInteractionsWithDictionary(std::string path);
+std::optional<Args> ParseArgs(int argc, char* argv[]);

@@ -1,4 +1,8 @@
 #include "modules.h"
+#include <iostream>
+#include <algorithm>
+#include <cctype>
+#include <iterator>
 
 std::string Str_tolower(std::string s)
 {
@@ -25,7 +29,17 @@ bool FindWordInVector(std::vector<std::string>& words, std::string word)
 	return false;
 }
 
-bool FindTermInDictionary(std::string& word, Dictionary& dictionary)
+std::string ConcatenationWordsFromVector(std::vector<std::string> words)
+{
+	std::string result;
+	for (auto iter : words)
+	{
+		result.append(iter).append(" ");
+	}
+	return result;
+}
+
+bool FindTermInDictionary(std::string& word, Dictionary& dictionary, std::string& messageToUser)
 {
 	bool foundWord = false;
 
@@ -36,8 +50,7 @@ bool FindTermInDictionary(std::string& word, Dictionary& dictionary)
 		if (FindWordInVector(terms, Str_tolower(word)))
 		{
 			foundWord = true;
-			copy(translations.begin(), translations.end(), std::ostream_iterator<std::string>(std::cout, " "));
-			std::cout << std::endl;
+			messageToUser = ConcatenationWordsFromVector(translations);
 			break;
 		}
 		if (!foundWord)
@@ -45,8 +58,7 @@ bool FindTermInDictionary(std::string& word, Dictionary& dictionary)
 			if (FindWordInVector(translations, Str_tolower(word)))
 			{
 				foundWord = true;
-				copy(terms.begin(), terms.end(), std::ostream_iterator<std::string>(std::cout, " "));
-				std::cout << std::endl;
+				messageToUser = ConcatenationWordsFromVector(terms);
 				break;
 			}
 		}
@@ -54,7 +66,7 @@ bool FindTermInDictionary(std::string& word, Dictionary& dictionary)
 	return foundWord;
 }
 
-bool FindTranslationInDictionary(std::string& translation, std::string& word, Dictionary& dictionary)
+bool FindTranslationInDictionary(std::string& translation, std::string& word, Dictionary& dictionary, std::string& messageToUser)
 {
 	bool foundWord = false;
 
@@ -67,8 +79,8 @@ bool FindTranslationInDictionary(std::string& translation, std::string& word, Di
 			foundWord = true;
 			translations.push_back(word);
 			dictionary.erase(iter.first);
-			dictionary.insert(std::make_pair(terms, translations));
-			std::cout << "ѕеревод слова '" << translation << "' сохраненен в словаре как '" << word << "'" << std::endl;
+			dictionary.insert(std::make_pair(terms, translations));//TODO: разделить бизнес-логику и общение с пользователем
+			messageToUser = "ѕеревод слова '" + translation + "' сохраненен в словаре как '" + word + "'";
 			break;
 		}
 		if (!foundWord)
@@ -79,7 +91,7 @@ bool FindTranslationInDictionary(std::string& translation, std::string& word, Di
 				terms.push_back(word);
 				dictionary.erase(iter.first);
 				dictionary.insert(std::make_pair(terms, translations));
-				std::cout << "ѕеревод слова '" << translation << "' сохраненен в словаре как '" << word << "'" << std::endl;
+				messageToUser = "ѕеревод слова '" + translation + "' сохраненен в словаре как '" + word + "'";
 				break;
 			}
 		}
@@ -87,7 +99,7 @@ bool FindTranslationInDictionary(std::string& translation, std::string& word, Di
 	return foundWord;
 }
 
-void AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, std::string& word, std::string& translation)
+void AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, std::string& word, std::string& translation, std::string& messageToUser)
 {
 	if (!foundWord)
 	{
@@ -98,21 +110,22 @@ void AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, 
 			words.push_back(word);
 			translations.push_back(translation);
 			dictionary.insert(std::make_pair(words, translations));
-			std::cout << "Cлово '" << word << "' сохраненено в словаре как '" << translation << "'" << std::endl;
+			messageToUser = "Cлово '" + word + "' сохраненено в словаре как '" + translation + "'";
 		}
 		else
 		{
 			words.push_back(translation);
 			translations.push_back(word);
 			dictionary.insert(std::make_pair(words, translations));
-			std::cout << "Cлово '" << word << "' сохраненено в словаре как '" << translation << "'" << std::endl;
+			messageToUser = "Cлово '" + word + "' сохраненено в словаре как '" + translation + "'";
 		}
 	}
 }
 
-void TranslateWord(std::string& word, Dictionary& dictionary)
+void WordInteractWithDictionary(std::string& word, Dictionary& dictionary)//TODO: метод translate должен только переводить, поигать с терминологией
 {
-	bool foundWord = FindTermInDictionary(word, dictionary);
+	std::string messageToUser;
+	bool foundWord = FindTermInDictionary(word, dictionary, messageToUser);
 	
 	if (!foundWord)
 	{
@@ -126,29 +139,30 @@ void TranslateWord(std::string& word, Dictionary& dictionary)
 		}
 		if (!translation.empty())
 		{
-			foundWord = FindTranslationInDictionary(translation, word, dictionary);
-			AddWordWithTranslationInDictionary(foundWord, dictionary, word, translation);
+			foundWord = FindTranslationInDictionary(translation, word, dictionary, messageToUser);
+			AddWordWithTranslationInDictionary(foundWord, dictionary, word, translation, messageToUser);
 		}
 	}
+	std::cout << messageToUser << std::endl;
 }
 
 std::vector<std::string> ParseString(std::string& line)
 {
 	std::vector<std::string> result;
-	std::string delimiter = ", ";
+	const std::string DELIMITER = ", ";
 	std::string word;
 	size_t pos = 0;
 
-	while ((pos = line.find(delimiter)) != std::string::npos) {
+	while ((pos = line.find(DELIMITER)) != std::string::npos) {
 		word = line.substr(0, pos);
 		result.push_back(word);
-		line.erase(0, pos + delimiter.length());
+		line.erase(0, pos + DELIMITER.length());
 	}
 	result.push_back(line);
 	return result;
 }
 
-bool ReadFileForDictionary(Dictionary& dictionary, std::fstream& input, std::string path)
+bool ReadDictionaryFromFile(Dictionary& dictionary, std::fstream& input, std::string path)//TODO: ReadDicFromFile
 {
 	input.open(path);
 
@@ -159,18 +173,18 @@ bool ReadFileForDictionary(Dictionary& dictionary, std::fstream& input, std::str
 	}
 
 	std::string line;
-	char openingBracket = '[';
-	char closingBracket = ']';
+	const char OPENING_BRACKET = '[';//TODO: use const
+	const char CLOSING_BRACKET = ']';
 
 	while (std::getline(input, line))
 	{
 		if (!line.empty())
 		{
-			size_t posOpeningBracket = line.find_first_of(openingBracket);
-			size_t posClosingBracket = line.find_first_of(closingBracket);
+			size_t posOpeningBracket = line.find_first_of(OPENING_BRACKET);
+			size_t posClosingBracket = line.find_first_of(CLOSING_BRACKET);
 			std::string terms = line.substr(posOpeningBracket + 1, posClosingBracket - posOpeningBracket - 1);
 
-			posClosingBracket = line.find_first_of(closingBracket);
+			posClosingBracket = line.find_first_of(CLOSING_BRACKET);
 			std::string translations = line.substr(posClosingBracket + 2, line.size() - 3);
 
 			dictionary.insert(std::make_pair(ParseString(terms), ParseString(translations)));
@@ -184,48 +198,48 @@ void UpdateTheDictionary(Dictionary& dictionary, std::fstream& output, const std
 	output.close();
 	output.open(path);
 
-	char openingBracket = '[';
-	char closingBracket = ']';
+	const char OPENING_BRACKET = '[';
+	const char CLOSING_BRACKET = ']';
 
 	for (auto iter : dictionary)
 	{
-		output << openingBracket;
+		output << OPENING_BRACKET;
 		copy(iter.first.begin(), iter.first.end() - 1, std::ostream_iterator<std::string>(output, ", "));
 		output << iter.first.at(iter.first.size() - 1);
-		output << closingBracket << ' ';
+		output << CLOSING_BRACKET << ' ';
 		copy(iter.second.begin(), iter.second.end() - 1, std::ostream_iterator<std::string>(output, ", "));
 		output << iter.second.at(iter.second.size() - 1);
 		output << std::endl;
 	}
 }
 
-bool UserInteractionsWithDictionary()
+bool UserInteractionsWithDictionary(std::string path)
 {
-	std::string path = "dictionary.txt";
+	//TODO: должен передаватьс€ как аргумент
 	std::fstream fileDictionary;
 	Dictionary dictionary;
 
-	if (!ReadFileForDictionary(dictionary, fileDictionary, path))
+	if (!ReadDictionaryFromFile(dictionary, fileDictionary, path))
 	{
 		return false;
 	}
 
 	std::string word;
-	std::string end = "...";
-	int transferCount = 0;
+	const std::string END = "...";//TODO: const
+	bool transferCount = false;//TODO: use boolean
 
 	while (std::getline(std::cin, word))
 	{
-		if (word == end)
+		if (word == END)
 		{
 			break;
 		}
-		bool err = false;
-		TranslateWord(word, dictionary);
-		transferCount++;
+		//TODO: remove
+		WordInteractWithDictionary(word, dictionary);
+		transferCount = true;
 	}
 	char ch;
-	if (transferCount != 0)
+	if (transferCount)
 	{
 		std::cout << "¬ словарь были внесены изменени€. ¬ведите Y или y дл€ сохранени€ перед выходом." << std::endl;
 		std::cin >> ch;
@@ -239,4 +253,16 @@ bool UserInteractionsWithDictionary()
 		}
 	}
 	return true;
+}
+
+std::optional<Args> ParseArgs(int argc, char* argv[])
+{
+	if (argc != 2)
+	{
+		std::cout << "Invalid argument count" << std::endl << "Usage: MiniDictionary.exe <dictionary.txt>" << std::endl;
+		return std::nullopt;
+	}
+	Args args;
+	args.input = argv[1];
+	return args;
 }
