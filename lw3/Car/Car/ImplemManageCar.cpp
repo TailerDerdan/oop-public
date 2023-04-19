@@ -71,22 +71,22 @@ void Info(const Car& car)
 
 void DialogWithUser()
 {
-	Car volvo;
+	Car car;
 	std::string line;
 
 	while (std::getline(std::cin, line))
 	{
 		if (line == "Info")
 		{
-			Info(volvo);
+			Info(car);
 		}
 		if (line == "EngineOn")
 		{
-			volvo.TurnOnEngine();
+			car.TurnOnEngine();
 		}
 		if (line == "EngineOff")
 		{
-			if (!volvo.TurnOffEngine())
+			if (!car.TurnOffEngine())
 			{
 				std::cout << "You can't turn off the engine" << std::endl;
 			}
@@ -102,14 +102,14 @@ void DialogWithUser()
 
 			if (command == "SetGear")
 			{
-				if (!volvo.SetGear(stoi(argument)))
+				if (!car.SetGear(stoi(argument)))
 				{
 					std::cout << "You can't change gear to" << argument << std::endl;
 				}
 			}
 			if (command == "SetSpeed")
 			{
-				if (!volvo.SetSpeed(stoi(argument)))
+				if (!car.SetSpeed(stoi(argument)))
 				{
 					std::cout << "You can't drive at " << argument << "this speed" << argument << std::endl;
 				}

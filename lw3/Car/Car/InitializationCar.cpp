@@ -47,10 +47,15 @@ bool Car::SetGear(int gear)
 	switch (gear)
 	{
 	case -1:
-		if ((m_speed == 0) && (m_gear == Gear::NeutralGear) && (m_direction == Direction::Standing && m_engineState) || (m_speed >= 0 && m_speed <= 20 && m_engineState))
+		if ((m_speed == 0) && (m_direction == Direction::Standing && m_engineState)
+			|| (m_speed >= 0 && m_speed <= 20 && m_engineState && m_gear == Gear::NeutralGear))
 		{
 			m_direction = Direction::Backward;
 			m_gear = Gear::ReverseGear;
+			if (m_speed == 0)
+			{
+				m_direction = Direction::Standing;
+			}
 		}
 		else
 		{
@@ -60,12 +65,26 @@ bool Car::SetGear(int gear)
 	case 0:
 		m_gear = Gear::NeutralGear;
 		m_direction = Direction::Backward;
+		if (m_speed == 0)
+		{
+			m_direction = Direction::Standing;
+		}
 		break;
 	case 1:
-		if ((m_gear == Gear::NeutralGear && m_speed != 0 && m_direction == Direction::Standing && m_engineState) || (m_speed >= 0 && m_speed <= 20 && m_engineState))
+		if ((m_gear == Gear::ReverseGear && m_speed != 0) || (m_gear == Gear::NeutralGear && m_speed != 0))
+		{
+			return false;
+		}
+		if ((m_speed >= 0 && m_speed <= 20 && m_engineState)
+			|| (m_gear == Gear::NeutralGear && m_speed == 0)
+			|| (m_speed == 0 && m_gear == Gear::ReverseGear))
 		{
 			m_gear = Gear::FirstGear;
 			m_direction = Direction::Forward;
+			if (m_speed == 0)
+			{
+				m_direction = Direction::Standing;
+			}
 		}
 		else
 		{

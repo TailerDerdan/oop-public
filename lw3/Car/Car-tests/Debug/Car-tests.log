@@ -1,0 +1,3 @@
+﻿  InitializationCar.cpp
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw3\car\car\initializationcar.cpp(148): warning C4018: >=: несоответствие типов со знаком и без знака
+  Car-tests.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw3\Car\Debug\Car-tests.exe

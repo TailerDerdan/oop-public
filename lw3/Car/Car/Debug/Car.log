@@ -1,3 +1,7 @@
-﻿  InitializationCar.cpp
-c:\users\anton\c++\oop-public\lw3\car\car\initializationcar.cpp(129): warning C4018: >=: несоответствие типов со знаком и без знака
-  Car.vcxproj -> C:\Users\Anton\C++\oop-public\lw3\Car\Debug\Car.exe
+﻿  Car.cpp
+  ImplemManageCar.cpp
+  InitializationCar.cpp
+c:\users\anton\programming_in_c++\gitlws\oop-public\lw3\car\car\initializationcar.cpp(129): warning C4018: >=: несоответствие типов со знаком и без знака
+  Создание кода...
+  LINK : не найден или не выполнена сборка C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw3\Car\Debug\Car.exe при последней инкрементной компоновке; выполняется полная компоновка
+  Car.vcxproj -> C:\Users\Anton\Programming_in_C++\gitLws\oop-public\lw3\Car\Debug\Car.exe
