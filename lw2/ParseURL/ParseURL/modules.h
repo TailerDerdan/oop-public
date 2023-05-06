@@ -3,13 +3,24 @@
 #include <iostream>
 #include <string>
 
-enum Protocol
+enum class Protocol
 {
 	HTTP,
 	HTTPS,
-	FTP
+	FTP,
+	Invalid
 };
 
-void ChangePort(int&, std::string&);
-bool ParseURL(std::string const&, Protocol&, int&, std::string&, std::string&);
-void OutputPort(Protocol&, int&, std::string, std::string&);
+struct URL
+{
+	Protocol protocol;
+	int port = 0;
+	std::string host;
+	std::string document;
+};
+
+Protocol GetProtocolByString(const std::string& protocol_str);
+int GetDefaultPortByProtocol(const std::string&);
+bool ParseURL(URL& urlStruct, const std::string& url);
+void OutputInfoAboutUrl(URL& urlStruct);
+void ParsingUrl();

@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <cctype>
 #include <iterator>
+#include <regex>
+
+const char OPENING_BRACKET = '[';
+const char CLOSING_BRACKET = ']';
+const std::string DELIMITER = ", ";
 
 std::string Str_tolower(std::string s)
 {
@@ -14,7 +19,14 @@ std::string Str_tolower(std::string s)
 
 bool IsEnglishWord(const std::string& word)
 {
-	return (word[0] >= 'A' && word[0] <= 'Z') || (word[0] >= 'a' && word[0] <= 'z');
+	std::regex englishWord(R"([a-zA-Z]+)");
+	std::smatch englishWordMatch;
+
+	if (std::regex_match(word, englishWordMatch, englishWord))
+	{
+		return true;
+	}
+	return false;
 }
 
 bool FindWordInVector(std::vector<std::string>& words, std::string word)
@@ -39,10 +51,9 @@ std::string ConcatenationWordsFromVector(std::vector<std::string> words)
 	return result;
 }
 
-bool FindTermInDictionary(std::string& word, Dictionary& dictionary, std::string& messageToUser)
+std::string FindTermInDictionary(std::string& word, Dictionary& dictionary, bool& foundWord)
 {
-	bool foundWord = false;
-
+	std::string messageToUser;
 	for (auto iter : dictionary)
 	{
 		std::vector<std::string> terms = iter.first;
@@ -51,7 +62,6 @@ bool FindTermInDictionary(std::string& word, Dictionary& dictionary, std::string
 		{
 			foundWord = true;
 			messageToUser = ConcatenationWordsFromVector(translations);
-			break;
 		}
 		if (!foundWord)
 		{
@@ -59,18 +69,16 @@ bool FindTermInDictionary(std::string& word, Dictionary& dictionary, std::string
 			{
 				foundWord = true;
 				messageToUser = ConcatenationWordsFromVector(terms);
-				break;
 			}
 		}
 	}
-	return foundWord;
+	return messageToUser;
 }
 
-bool FindTranslationInDictionary(std::string& translation, std::string& word, Dictionary& dictionary, std::string& messageToUser)
+std::string FindTranslationInDictionary(std::string& translation, std::string& word, Dictionary& dictionary, bool& foundWord)
 {
-	bool foundWord = false;
-
-	for (auto iter : dictionary)
+	std::string messageToUser;
+	for (auto& iter : dictionary)
 	{
 		std::vector<std::string> terms = iter.first;
 		std::vector<std::string> translations = iter.second;
@@ -81,7 +89,6 @@ bool FindTranslationInDictionary(std::string& translation, std::string& word, Di
 			dictionary.erase(iter.first);
 			dictionary.insert(std::make_pair(terms, translations));//TODO: разделить бизнес-логику и общение с пользователем
 			messageToUser = "Перевод слова '" + translation + "' сохраненен в словаре как '" + word + "'";
-			break;
 		}
 		if (!foundWord)
 		{
@@ -92,14 +99,13 @@ bool FindTranslationInDictionary(std::string& translation, std::string& word, Di
 				dictionary.erase(iter.first);
 				dictionary.insert(std::make_pair(terms, translations));
 				messageToUser = "Перевод слова '" + translation + "' сохраненен в словаре как '" + word + "'";
-				break;
 			}
 		}
 	}
-	return foundWord;
+	return messageToUser;
 }
 
-void AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, std::string& word, std::string& translation, std::string& messageToUser)
+std::string AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, std::string& word, std::string& translation, std::string& messageToUser)
 {
 	if (!foundWord)
 	{
@@ -120,12 +126,15 @@ void AddWordWithTranslationInDictionary(bool foundWord, Dictionary& dictionary, 
 			messageToUser = "Cлово '" + word + "' сохраненено в словаре как '" + translation + "'";
 		}
 	}
+	return messageToUser;
 }
 
 void WordInteractWithDictionary(std::string& word, Dictionary& dictionary)//TODO: метод translate должен только переводить, поигать с терминологией
 {
 	std::string messageToUser;
-	bool foundWord = FindTermInDictionary(word, dictionary, messageToUser);
+	std::string translationWord;
+	bool foundWord = false;
+	translationWord = FindTermInDictionary(word, dictionary, foundWord);
 	
 	if (!foundWord)
 	{
@@ -139,17 +148,23 @@ void WordInteractWithDictionary(std::string& word, Dictionary& dictionary)//TODO
 		}
 		if (!translation.empty())
 		{
-			foundWord = FindTranslationInDictionary(translation, word, dictionary, messageToUser);
-			AddWordWithTranslationInDictionary(foundWord, dictionary, word, translation, messageToUser);
+			messageToUser = FindTranslationInDictionary(translation, word, dictionary, foundWord);
+			messageToUser = AddWordWithTranslationInDictionary(foundWord, dictionary, word, translation, messageToUser);
 		}
 	}
-	std::cout << messageToUser << std::endl;
+	if (!translationWord.empty())
+	{
+		std::cout << translationWord << std::endl;
+	}
+	else
+	{
+		std::cout << messageToUser << std::endl;
+	}
 }
 
 std::vector<std::string> ParseString(std::string& line)
 {
 	std::vector<std::string> result;
-	const std::string DELIMITER = ", ";
 	std::string word;
 	size_t pos = 0;
 
@@ -173,8 +188,6 @@ bool ReadDictionaryFromFile(Dictionary& dictionary, std::fstream& input, std::st
 	}
 
 	std::string line;
-	const char OPENING_BRACKET = '[';//TODO: use const
-	const char CLOSING_BRACKET = ']';
 
 	while (std::getline(input, line))
 	{
@@ -197,9 +210,6 @@ void UpdateTheDictionary(Dictionary& dictionary, std::fstream& output, const std
 {
 	output.close();
 	output.open(path);
-
-	const char OPENING_BRACKET = '[';
-	const char CLOSING_BRACKET = ']';
 
 	for (auto iter : dictionary)
 	{

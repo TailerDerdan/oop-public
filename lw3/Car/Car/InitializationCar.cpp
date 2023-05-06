@@ -1,4 +1,41 @@
 #include "Car.h"
+#include <iostream>
+
+//ѕереключить передачу можно только при включенном двигателе
+//Ќа нейтральной передаче мы можем ехать вперед
+//ѕри неверной команде говорить Unknow command
+
+Gear Car::ReturnTheTransferValue(int gear)
+{
+	switch (gear)
+	{
+	case -1:
+		return Gear::ReverseGear;
+	case 0:
+		return Gear::NeutralGear;
+	case 1:
+		return Gear::FirstGear;
+	case 2:
+		return Gear::SecondGear;
+	case 3:
+		return Gear::ThirdGear;
+	case 4:
+		return Gear::FourthGear;
+	case 5:
+		return Gear::FiveGear;
+	default:
+		return Gear::ErrorGear;
+	}
+}
+
+Gear Car::ChangeGearDependingSpeed(int lowerLimit, int underLimit, int gear)
+{
+	if (m_speed >= lowerLimit && m_speed <= underLimit)
+	{
+		return ReturnTheTransferValue(gear);
+	}
+	return m_gear;
+}
 
 bool Car::isTurnedOn() const
 {
@@ -7,12 +44,20 @@ bool Car::isTurnedOn() const
 
 Direction Car::GetDirection() const
 {
-	return m_direction;
+	if (m_speed > 0)
+	{
+		return Direction::Forward;
+	}
+	if (m_speed < 0)
+	{
+		return Direction::Backward;
+	}
+	return Direction::Standing;
 }
 
-size_t Car::GetSpeed() const
+int Car::GetSpeed() const
 {
-	return m_speed;
+	return std::abs(m_speed);
 }
 
 Gear Car::GetGear() const
@@ -27,14 +72,13 @@ bool Car::TurnOnEngine()
 		m_engineState = true;
 		m_gear = Gear::NeutralGear;
 		m_speed = 0;
-		m_direction = Direction::Standing;
 	}
 	return true;
 }
 
 bool Car::TurnOffEngine()
 {
-	if (m_gear == Gear::NeutralGear && m_speed == 0 && m_direction == Direction::Standing)
+	if (m_gear == Gear::NeutralGear && m_speed == 0)
 	{
 		m_engineState = false;
 		return true;
@@ -44,18 +88,19 @@ bool Car::TurnOffEngine()
 
 bool Car::SetGear(int gear)
 {
+	//сделать метод покороче
+	if (!m_engineState)
+	{
+		return false;
+	}
+	//почему здесь фигурируют диапозоны скоростей
 	switch (gear)
 	{
-	case -1:
-		if ((m_speed == 0) && (m_direction == Direction::Standing && m_engineState)
-			|| (m_speed >= 0 && m_speed <= 20 && m_engineState && m_gear == Gear::NeutralGear))
+	case -1://можно переключитс€ на заднюю передачу только при остановке
+		if ((m_speed == 0) || (m_speed >= 0 && m_speed <= 20 && m_gear == Gear::NeutralGear))
 		{
-			m_direction = Direction::Backward;
+			m_speed = -m_speed;
 			m_gear = Gear::ReverseGear;
-			if (m_speed == 0)
-			{
-				m_direction = Direction::Standing;
-			}
 		}
 		else
 		{
@@ -64,27 +109,17 @@ bool Car::SetGear(int gear)
 		break;
 	case 0:
 		m_gear = Gear::NeutralGear;
-		m_direction = Direction::Backward;
-		if (m_speed == 0)
-		{
-			m_direction = Direction::Standing;
-		}
 		break;
 	case 1:
 		if ((m_gear == Gear::ReverseGear && m_speed != 0) || (m_gear == Gear::NeutralGear && m_speed != 0))
 		{
 			return false;
 		}
-		if ((m_speed >= 0 && m_speed <= 20 && m_engineState)
+		if ((m_speed >= 0 && m_speed <= 20)
 			|| (m_gear == Gear::NeutralGear && m_speed == 0)
 			|| (m_speed == 0 && m_gear == Gear::ReverseGear))
 		{
 			m_gear = Gear::FirstGear;
-			m_direction = Direction::Forward;
-			if (m_speed == 0)
-			{
-				m_direction = Direction::Standing;
-			}
 		}
 		else
 		{
@@ -92,34 +127,23 @@ bool Car::SetGear(int gear)
 		}
 		break;
 	case 2:
-		if (m_speed >= 20 && m_speed <= 50)
-		{
-			m_gear = Gear::SecondGear;
-			m_direction = Direction::Forward;
-		}
+		m_gear = ChangeGearDependingSpeed(20, 50, gear);
 		break;
 	case 3:
-		if (m_speed >= 30 && m_speed <= 60)
-		{
-			m_gear = Gear::ThirdGear;
-			m_direction = Direction::Forward;
-		}
+		m_gear = ChangeGearDependingSpeed(30, 60, gear);
 		break;
 	case 4:
-		if (m_speed >= 40 && m_speed <= 90)
-		{
-			m_gear = Gear::FourthGear;
-			m_direction = Direction::Forward;
-		}
+		m_gear = ChangeGearDependingSpeed(40, 90, gear);
 		break;
 	case 5:
-		if (m_speed >= 50 && m_speed <= 150)
-		{
-			m_gear = Gear::FiveGear;
-			m_direction = Direction::Forward;
-		}
+		m_gear = ChangeGearDependingSpeed(20, 50, gear);
 		break;
 	default:
+		return false;
+	}
+
+	if (m_gear == Gear::ErrorGear)
+	{
 		return false;
 	}
 
@@ -128,16 +152,16 @@ bool Car::SetGear(int gear)
 
 bool Car::SetSpeed(int speed)
 {
+	if (speed < 0)
+	{
+		return false;
+	}
 	switch (m_gear)
 	{
 	case Gear::ReverseGear:
-		if (m_speed >= 0 && m_speed <= 20)
+		if (speed >= 0 && speed <= 20)
 		{
-			m_speed = speed;
-			if (speed == 0)
-			{
-				m_direction = Direction::Standing;
-			}
+			m_speed = -speed;
 		}
 		else
 		{
@@ -145,12 +169,15 @@ bool Car::SetSpeed(int speed)
 		}
 		break;
 	case Gear::NeutralGear:
-		if (m_speed >= speed)
+		if (std::abs(m_speed) >= speed)
 		{
-			m_speed = speed;
-			if (speed == 0)
+			if (m_speed < 0)
 			{
-				m_direction = Direction::Standing;
+				m_speed = -speed;
+			}
+			else
+			{
+				m_speed = speed;
 			}
 		}
 		else
@@ -159,13 +186,9 @@ bool Car::SetSpeed(int speed)
 		}
 		break;
 	case Gear::FirstGear:
-		if (m_speed >= 0 && m_speed <= 30)
+		if (speed >= 0 && speed <= 30)
 		{
 			m_speed = speed;
-			if (speed == 0)
-			{
-				m_direction = Direction::Standing;
-			}
 		}
 		else
 		{
@@ -173,7 +196,7 @@ bool Car::SetSpeed(int speed)
 		}
 		break;
 	case Gear::SecondGear:
-		if (m_speed >= 20 && m_speed <= 50)
+		if (speed >= 20 && speed <= 50)
 		{
 			m_speed = speed;
 		}
@@ -183,7 +206,7 @@ bool Car::SetSpeed(int speed)
 		}
 		break;
 	case Gear::ThirdGear:
-		if (m_speed >= 30 && m_speed <= 60)
+		if (speed >= 30 && speed <= 60)
 		{
 			m_speed = speed;
 		}
@@ -193,7 +216,7 @@ bool Car::SetSpeed(int speed)
 		}
 		break;
 	case Gear::FourthGear:
-		if (m_speed >= 40 && m_speed <= 90)
+		if (speed >= 40 && speed <= 90)
 		{
 			m_speed = speed;
 		}
@@ -203,7 +226,7 @@ bool Car::SetSpeed(int speed)
 		}
 		break;
 	case Gear::FiveGear:
-		if (m_speed >= 50 && m_speed <= 150)
+		if (speed >= 50 && speed <= 150)
 		{
 			m_speed = speed;
 		}

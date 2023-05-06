@@ -21,7 +21,7 @@
     <ClCompile Include="InitializationCar.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="ImplemManageCar.cpp">
+    <ClCompile Include="ImplementationManageCar.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

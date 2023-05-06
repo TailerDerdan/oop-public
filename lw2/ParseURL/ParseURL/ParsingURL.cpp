@@ -1,75 +1,118 @@
 #include "modules.h"
 #include <regex>
+#include <cctype>
 
-void ChangeProtocol(Protocol& protocol, std::string& protocol_str)
+//всегда возвращать значение функции
+//с большой буквы
+//по константной ссылке
+Protocol GetProtocolByString(const std::string& protocol_str)
 {
 	if (protocol_str == "http")
 	{
-		protocol = HTTP;
+		return Protocol::HTTP;
 	}
 	else if (protocol_str == "https")
 	{
-		protocol = HTTPS;
+		return Protocol::HTTPS;
 	}
 	else if (protocol_str == "ftp")
 	{
-		protocol = FTP;
+		return Protocol::FTP;
 	}
+	return Protocol::Invalid;
 }
 
-void ChangePort(int& port, std::string& protocol_str)
+//всегда возвращать значение функции
+int GetDefaultPortByProtocol(const std::string& protocol_str)
 {
-	if (port == 0)
+	if (protocol_str == "http")
 	{
-		if (protocol_str == "http")
-		{
-			port = 80;
-		}
-		else if (protocol_str == "https")
-		{
-			port = 443;
-		}
-		else if (protocol_str == "ftp")
-		{
-			port = 21;
-		}
+		return 80;
 	}
+	else if (protocol_str == "https")
+	{
+		return 443;
+	}
+	else if (protocol_str == "ftp")
+	{
+		return 21;
+	}
+	return EXIT_FAILURE;
 }
 
-bool ParseURL(std::string const& url, Protocol& protocol, int& port, std::string& host, std::string& document)
+std::string Str_tolower(std::string s)
 {
-	std::regex url_regex(R"(((https?|ftp):\/\/)([^\/:]+)(?::(\d+))?(\/\S*)?)", std::regex_constants::icase);
+	std::string result = s;
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+	std::swap(result, s);
+	return result;
+}
 
-	std::smatch url_match;
+//вынести url в отдельную переменную типа string
+bool ParseURL(URL& urlStruct, std::string& url)
+{
+	url = Str_tolower(url);
+	std::regex urlRegex(R"(((https?|ftp):\/\/)([^\/:]+)(?::(\d+))?(\/\S*)?)"); //должно быть без учета регистра
 
-	if (std::regex_match(url, url_match, url_regex)) {
-		std::string protocol_str = url_match[2].str();
-		host = url_match[3].str();
-		ChangeProtocol(protocol, protocol_str);
+	std::smatch urlMatch;
 
-		if (!url_match[4].str().empty())
+	if (std::regex_match(url, urlMatch, urlRegex))
+	{
+		std::string protocolStr = urlMatch[2].str();
+		urlStruct.host = urlMatch[3].str();
+		urlStruct.protocol = GetProtocolByString(protocolStr);
+		if (urlStruct.protocol == Protocol::Invalid)
 		{
-			port = std::stoi(url_match[4].str());
+			return false;
 		}
-		if (url_match[4].str().empty())
+
+		if (!urlMatch[4].str().empty())
 		{
-			ChangePort(port, protocol_str);
+			urlStruct.port = std::stoi(urlMatch[4].str());
+			if (urlStruct.port < 1 || urlStruct.port > 65535)
+			{
+				return false;
+			}
+		}
+
+		if (urlMatch[4].str().empty())
+		{
+			urlStruct.port = GetDefaultPortByProtocol(protocolStr);
+			if (urlStruct.port == EXIT_FAILURE)
+			{
+				return false;
+			}
 		}
 		
-		if (!url_match[5].str().empty())
+		if (!urlMatch[5].str().empty())
 		{
-			document.append(url_match[5].str(), 1, url_match[5].str().size() - 1);
+			urlStruct.document.append(urlMatch[5].str(), 1, urlMatch[5].str().size() - 1);
 		}
-	}
-	else {
-		return false;
-	}
-	return true;
+		return true;
+	}//убрать else
+	return false;
 }
 
-void OutputPort(Protocol& protocol, int& port, std::string host, std::string& document)
+//переименовать функцию
+void OutputInfoAboutUrl(URL& urlStruct)
 {
-	std::cout << "HOST: " << host << std::endl;
-	std::cout << "PORT: " << port << std::endl;
-	std::cout << "DOC: " << document << std::endl;
+	std::cout << "HOST: " << urlStruct.host << std::endl;
+	std::cout << "PORT: " << urlStruct.port << std::endl;
+	std::cout << "DOC: " << urlStruct.document << std::endl;
+}
+
+void ParsingUrl()
+{
+	URL urlStruct;
+	std::string url;
+
+	while (std::getline(std::cin, url))
+	{
+		if (!ParseURL(urlStruct, url))
+		{
+			std::cout << "Invalid URL" << std::endl;
+			continue;
+		}
+		OutputInfoAboutUrl(urlStruct);
+	}	
 }

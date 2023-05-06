@@ -1,19 +1,8 @@
 ﻿#include "modules.h"
-
+//порты в диапозоне от 1 до 65535 включительно
 int main() {
 
-	std::string url = "ftp://www.mysite.com/docs/document1.html?page=30&lang=en#title";
-	Protocol protocol;
-	int port = 0;
-	std::string host;
-	std::string document;
-
-	if (!ParseURL(url, protocol, port, host, document))
-	{
-		std::cout << "Invalid URL" << std::endl;
-		return EXIT_FAILURE;
-	}
-	OutputPort(protocol, port, host, document);
+	ParsingUrl();
 
 	return EXIT_SUCCESS;
 }

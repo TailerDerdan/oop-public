@@ -11,6 +11,13 @@ std::set<int> TheSieveOfEratosfen(int upperBound)
 	{
 		return result;
 	}
+
+	if (upperBound == LOWER_BOUND)
+	{
+		result.insert(upperBound);
+		return result;
+	}
+
 	// почитать про vector<bool>
 	// Numbers => isCompound, sieve
 	std::vector<bool> isCompound = std::vector<bool>(upperBound, false);
@@ -31,10 +38,6 @@ std::set<int> TheSieveOfEratosfen(int upperBound)
 		{
 			result.insert(num);
 		}
-	}
-	if (!isCompound[upperBound - 1])
-	{
-		result.insert(upperBound);
 	}
 	return result;
 }

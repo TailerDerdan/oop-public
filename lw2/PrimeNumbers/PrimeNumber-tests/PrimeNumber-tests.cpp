@@ -24,3 +24,9 @@ SCENARIO("Check lower bound")
 	std::set<int> primeNums = TheSieveOfEratosfen(2);
 	REQUIRE(primeNums.size() == 1);
 }
+
+SCENARIO("Uncorrect input dates")
+{
+	std::set<int> primeNums = TheSieveOfEratosfen(-1);
+	REQUIRE(primeNums.size() == 0);
+}
