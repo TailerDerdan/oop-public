@@ -19,9 +19,10 @@ public:
 	void WorkWithMemory();
 protected:
 	static std::set<Variable> m_variables;
-	std::set<Functions> m_funcs;
+	static std::set<Functions> m_funcs;
 private:
 	std::string sequence;
+	const std::set<char> m_operations = {'+', '-', '*', '/'};
 };
 
 class Identificator
@@ -72,8 +73,9 @@ class Operator : public Memory
 {
 public:
 	Operator();
+	std::string GetOperation() const;
 
-	double Calculate();
+	double Calculate(const std::string& operation);
 	bool FindAndAssignIdent(const std::string& var);
 	bool FindAndAssignIdent(const std::string& varLeft, const std::string& varRight);
 
@@ -82,7 +84,7 @@ private:
 	void UpdateValues();
 	Identificator m_leftVar, m_rightVar;
 	double m_identLeft, m_identRight;
-	char m_operator;
+	std::string m_operator;
 };
 
 
@@ -91,9 +93,12 @@ class Functions : public Memory
 public:
 	Identificator GetName() const;
 	double GetResult() const;
+	Operator GetOperator() const;
 
 	bool MakeAFunc(const std::string& name, const std::string& var);
-	bool MakeAFunc(const std::string& name, const std::string& varLeft, const std::string& varRight);
+	bool MakeAFunc(const std::string& name, const std::string& varLeft,
+		const std::string& varRight, const std::string& operation);
+	bool operator<(const Functions& funcRight) const;
 
 private:
 	bool WasThereIdentBefore(const Identificator& name);

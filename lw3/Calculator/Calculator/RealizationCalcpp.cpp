@@ -1,15 +1,14 @@
 #include "ClassForWorkCalc.h"
 
 std::set<Variable> Memory::m_variables;
+std::set<Functions> Memory::m_funcs;
 
 void Memory::PrintFunc()
 {
-	/*
 	for (auto iter : m_funcs)
 	{
 		std::cout << iter.GetName().GetName() << ':' << iter.GetResult() << std::endl;
 	}
-	*/
 }
 
 void Memory::PrintVars()
@@ -18,7 +17,6 @@ void Memory::PrintVars()
 	{
 		std::cout << iter.GetName().GetName() << ':' << iter.GetValue() << std::endl;
 	}
-
 }
 
 void Memory::Print(std::string name)
@@ -43,16 +41,16 @@ void Memory::Print(std::string name)
 			return;
 		}
 	}
-	/*
+	
 	for (auto iter : m_funcs)
 	{
 		if (iter.GetName() == nameId)
 		{
+			iter.GetOperator().Calculate(iter.GetOperator().GetOperation());
 			std::cout << iter.GetResult() << std::endl;
 			return;
 		}
 	}
-	*/
 }
 
 bool Memory::ParseSequence(std::string sequence)
@@ -68,7 +66,7 @@ bool Memory::ParseSequence(std::string sequence)
 		return true;
 	}
 
-	int foundPosSpace = sequence.find_first_of(' ');
+	size_t foundPosSpace = sequence.find_first_of(' ');
 	if (foundPosSpace <= sequence.size())
 	{
 		std::string command;
@@ -125,6 +123,42 @@ bool Memory::ParseSequence(std::string sequence)
 			int foundPosEquel = sequence.find_first_of('=');
 			arg.append(sequence, foundPosSpace + 1, foundPosEquel - foundPosSpace - 1);
 
+			size_t foundPosOperation;
+			for (auto iter : m_operations)
+			{
+				foundPosOperation = sequence.find_first_of(iter);
+				if (foundPosOperation < sequence.size())
+				{
+					break;
+				}
+			}
+			if (foundPosOperation >= sequence.size())
+			{
+				std::string argIdent;
+				argIdent.append(sequence, foundPosEquel + 1, sequence.size() - foundPosEquel);
+				Functions func;
+				if (func.MakeAFunc(arg, argIdent))
+				{
+					m_funcs.insert(func);
+					return true;
+				}
+			}		
+
+			std::string operation;
+			operation.append(sequence, foundPosOperation, 1);
+
+			std::string identLeft;
+			identLeft.append(sequence, foundPosEquel + 1, foundPosOperation - foundPosEquel - 1);
+			std::string identRight;
+			identRight.append(sequence, foundPosOperation + 1, sequence.size() - foundPosOperation);
+
+			Functions func;
+			if (func.MakeAFunc(arg, identLeft, identRight, operation))
+			{
+				m_funcs.insert(func);
+				return true;
+			}
+			return false;
 		}
 	}
 	return false;
@@ -325,6 +359,12 @@ Operator::Operator()
 {
 	m_identLeft = 0;
 	m_identRight = 0;
+	m_operator = "+";
+}
+
+std::string Operator::GetOperation() const
+{
+	return m_operator;
 }
 
 bool Operator::FindAndAssignIdent(const std::string& var)
@@ -348,6 +388,11 @@ bool Operator::FindAndAssignIdent(const std::string& var)
 			m_leftVar = iter.GetName();
 		}
 	}
+	if ((m_leftVar.GetName().empty()) || (m_rightVar.GetName().empty()))
+	{
+		return false;
+	}
+	return true;
 }
 
 bool Operator::FindAndAssignIdent(const std::string& varLeft, const std::string& varRight)
@@ -384,24 +429,30 @@ bool Operator::FindAndAssignIdent(const std::string& varLeft, const std::string&
 			m_rightVar = iter.GetName();
 		}
 	}
+	if ((m_leftVar.GetName().empty()) || (m_rightVar.GetName().empty()))
+	{
+		return false;
+	}
+	return true;
 }
 
-double Operator::Calculate()
+double Operator::Calculate(const std::string& operation)
 {
 	UpdateValues();
-	if (m_operator == '+')
+	m_operator = operation;
+	if (m_operator == "+")
 	{
 		return m_identLeft + m_identRight;
 	}
-	if (m_operator == '-')
+	if (m_operator == "-")
 	{
 		return m_identLeft - m_identRight;
 	}
-	if (m_operator == '*')
+	if (m_operator == "*")
 	{
 		return m_identLeft * m_identRight;
 	}
-	if (m_operator == '/')
+	if (m_operator == "/")
 	{
 		if (m_identRight == 0)
 		{
@@ -409,6 +460,7 @@ double Operator::Calculate()
 		}
 		return m_identLeft / m_identRight;
 	}
+	return NAN;
 }
 
 Operator::~Operator()
@@ -456,6 +508,11 @@ double Functions::GetResult() const
 	return m_result;
 }
 
+Operator Functions::GetOperator() const
+{
+	return m_localVariable;
+}
+
 bool Functions::WasThereIdentBefore(const Identificator& name)
 {
 	for (auto iter : m_funcs)
@@ -481,11 +538,12 @@ bool Functions::MakeAFunc(const std::string& name, const std::string& var)
 	{
 		return false;
 	}
-	m_result = m_localVariable.Calculate();
+	m_result = m_localVariable.Calculate(m_localVariable.GetOperation());
 	return true;
 }
 
-bool Functions::MakeAFunc(const std::string& name, const std::string& varLeft, const std::string& varRight)
+bool Functions::MakeAFunc(const std::string& name, const std::string& varLeft,
+	const std::string& varRight, const std::string& operation)
 {
 	Identificator nameFunc(name);
 	if (WasThereIdentBefore(nameFunc))
@@ -498,6 +556,15 @@ bool Functions::MakeAFunc(const std::string& name, const std::string& varLeft, c
 	{
 		return false;
 	}
-	m_result = m_localVariable.Calculate();
+	m_result = m_localVariable.Calculate(operation);
 	return true;
+}
+
+bool Functions::operator<(const Functions& funcRight) const
+{
+	if (m_name.GetName() < funcRight.GetName().GetName())
+	{
+		return true;
+	}
+	return false;
 }
