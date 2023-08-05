@@ -21,6 +21,9 @@
     <ClCompile Include="RealizationCalcpp.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="ClassForWorkCalc.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassForWorkCalc.h">

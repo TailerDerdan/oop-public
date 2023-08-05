@@ -3,6 +3,5 @@
 
 int main()
 {
-	Memory window;
-	window.WorkWithMemory();
+	
 }
